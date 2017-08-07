@@ -37,7 +37,7 @@ class DBRowFormat implements Countable {
     // o dicho valor por defecto no existe,
     // devolvemos FALSE.
     if( !array_key_exists( $name, $values ) ) {
-      if( $ignoreDefault || ( count( $curr ) < 3 ) )
+      if( $ignoreDefault || ( count( $curr ) < 2 ) )
         throw new Exception( 'Campo obligatorio \'' . $name .'\' sin valor' );
 
       return [ $curr[1], $curr[0] ];
