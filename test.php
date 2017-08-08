@@ -18,46 +18,69 @@ define( 'DATA2', [
 
 require( './dbrowformat.php' );
 
-class Statement {
+class Statement implements Countable {
   public $result = [ ];
-  public $binds = 0;
 
-  function bindValue( $name, $value, $type = NULL ) {
-    $this->result[$name] = [ $value, $type ];
-    ++$this->binds;
+  function count( ) { return count( $this->result ); }
+  function bindValue( $name, $value, $type = NULL ) { $this->result[$name] = [ $value, $type ]; }
+  function dump( ) {
+    echo 'Núm. de elementos: ', count( $this ), "\n";
+
+    foreach( $this->result as $k => $v )
+      echo '  ', $k, '-> valor: ', print_r( $v[0], TRUE ), ', tipo: ', $v[1], "\n";
   }
 }
 
+echo "TEST 1: Todos los campos, ignorando los valores por defecto.\n";
+
 try {
-  $error1 = NULL;
-  $test1 = new DBRowFormat( FORMAT1, DATA1, DBRowFormat::REQUIREALL, TRUE );
+  $error = NULL;
+  $test = new DBRowFormat( FORMAT1, DATA1, DBRowFormat::REQUIREALL, TRUE );
 } catch( Exception $err ) {
-  $error1 = $err->getMessage( );
+  $error = $err->getMessage( );
 }
 
-echo "TEST 1:\n";
-
-if( empty( $error1 ) ){
+if( empty( $error ) ){
   echo "FALLIDO !!\n";
   exit( );
 } else {
   echo "PASADO\n";
-  echo 'Error generado: ' . $error1 . "\n";
+  echo 'Error generado: ' . $error . "\n";
 }
 
-echo "\nTEST 2:";
+echo "\nTEST 2: Todos los campos, SIN IGNORAR los valores por defecto.\n";
 
 try {
-  $error2 = NULL;
-  $test2 = new DBRowFormat( FORMAT1, DATA2, DBRowFormat::REQUIREALL, FALSE );
+  $error = NULL;
+  $test = new DBRowFormat( FORMAT1, DATA1, DBRowFormat::REQUIREALL, FALSE );
 } catch( Exception $err ) {
-  $error2 = $err->getMessage( );
+  $error = $err->getMessage( );
 }
 
-if( empty( $error2 ) ) {
-  echo "PASADO.\n";
-  echo 'names->', $test2->names( TRUE ), "\n";
-  echo 'params->', $test2->params( TRUE ), "\n";
+if( empty( $error ) ){
+  echo "FALLIDO !!\n";
+  exit( );
 } else {
-  echo "FALLIDO !!\nError generado: " . $error2 . "\n";
+  echo "PASADO\n";
+  echo 'Error generado: ' . $error . "\n";
+}
+
+echo "\nTEST 3: Todos los campos, SIN IGNORAR los valores por defecto.\n";
+
+try {
+  $stm = new Statement( );
+  $error = NULL;
+  $test = new DBRowFormat( FORMAT1, DATA2, DBRowFormat::REQUIREALL, FALSE );
+  $test->bind( $stm );
+} catch( Exception $err ) {
+  $error = $err->getMessage( );
+}
+
+if( empty( $error ) ) {
+  echo "PASADO.\n";
+  echo 'names->', $test->names( TRUE ), "\n";
+  echo 'params->', $test->params( TRUE ), "\n";
+  $stm->dump( );
+} else {
+  echo "FALLIDO !!\nError generado: " . $error . "\n";
 }
