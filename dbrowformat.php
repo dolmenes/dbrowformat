@@ -24,7 +24,7 @@ class DBRowFormat implements Countable {
 
   private static function getValue( $format, $values, $name, $ignoreDefault ) {
     if( !array_key_exists( $name, $format ) )
-      throw new Exception( 'Campo \'' . $name . '\' no existe en el formato' );
+      throw new Exception( 'Campo [' . $name . '] no existe en el formato' );
 
     $curr = $format[$name];
 
@@ -35,12 +35,12 @@ class DBRowFormat implements Countable {
     // Si no se pasó un valor explícito, y, además,
     // se ignora el valor por defecto,
     // o dicho valor por defecto no existe,
-    // devolvemos FALSE.
+    // lanzamos una excepción.
     if( !array_key_exists( $name, $values ) ) {
       if( $ignoreDefault || ( count( $curr ) < 2 ) )
-        throw new Exception( 'Campo obligatorio \'' . $name .'\' sin valor' );
+        throw new Exception( 'Campo obligatorio [' . $name .'] sin valor explícito' );
 
-      return [ $curr[1], $curr[0] ];
+      return [ $curr[1], $curr[count($curr) > 2 ? 2 : 0] ];
     }
 
     return [ $values[$name], $curr[0] ];
@@ -67,7 +67,7 @@ class DBRowFormat implements Countable {
         break;
 
       default:
-        throw new Exception( 'Argumento \'$list\' inválido' );
+        throw new Exception( 'Argumento [' . $list . '] inválido' );
       }
     }
 
@@ -113,6 +113,6 @@ class DBRowFormat implements Countable {
   function bind( $stm ) {
     foreach( $this->realValues as $k => $v )
       if( $stm->bindValue( ':' . $k, $v[0], $v[1] ) === FALSE )
-        throw new Exception( 'Error en bindValue( \'' . $k . '\' )' );
+        throw new Exception( 'Error en bindValue( [' . $k . '] )' );
   }
 }
