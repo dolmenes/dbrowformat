@@ -4,7 +4,7 @@
 FORMATO A EMPLEAR:
 
   'nombre_de_columna' => TIPO
-  'nombre_de_columna' => Array( TIPO [ , valor_por_defecto [ , tipo_del_valor_por_defecto ] ] )
+  'nombre_de_columna' => Array( [ Array( lista_de_valores ), ] TIPO [ , valor_por_defecto [ , tipo_del_valor_por_defecto ] ] )
 
 EJEMPLOS
   [
@@ -22,48 +22,38 @@ class DBRowFormat implements Countable {
   const REQUIREALL = 0; // Todo lo que esté en '$format'.
   const WITHVALUES = 1; // Todo lo que esté en '$values'.
 
+  // Valor de retorno: [ valor, tipo ]
   private static function getValue( $format, $values, $name, $ignoreDefault ) {
     if( !array_key_exists( $name, $format ) )
       throw new Exception( 'Campo [' . $name . '] no existe en el formato' );
 
     $curr = $format[$name];
 
-    // Lo convertimos a Array[ tipo, valor_por_defecto, tipo_del_valor_por_defecto ].
+    // Lo convertimos a Array[ lista_valores, tipo, valor_por_defecto, tipo_del_valor_por_defecto ].
     if( !is_array( $curr ) )
-      $curr = [ $curr ];
+      $curr = [ NULL, $curr ];
+    else if( !is_array( $curr[0] ) )
+      array_unshift( $curr, NULL );
 
     // Si no se pasó un valor explícito, y, además,
     // se ignora el valor por defecto,
     // o dicho valor por defecto no existe,
     // lanzamos una excepción.
     if( !array_key_exists( $name, $values ) ) {
-      if( $ignoreDefault || ( count( $curr ) < 2 ) )
+      if( $ignoreDefault || ( count( $curr ) < 3 ) )
         throw new Exception( 'Campo obligatorio [' . $name .'] sin valor explícito' );
 
-<<<<<<< HEAD
-      return [ $curr[1], $curr[count($curr) > 2 ? 2 : 0] ];
-=======
-      return [ $curr[1], $curr[0] ];
+      return [ $curr[2], $curr[count($curr) > 3 ? 3 : 1] ];
     } else {
       // Hay un valor explícito.
-      // Comprobamos si existe un validador.
+      // Comprobamos si hay una lista de valores permitidos.
       if( is_array( $curr[0] ) ) {
-        // Hay un validador.
-        if( count( $curr[0] ) === 1 ) {
-          // El validador es una función.
-          // El valor real es EL DEVUELTO por la función.
-          return $curr[0][0]( $values[$name], $name, $format );
-        } else {
-          // Es una lista de valores válidos.
-          // Si el valor no está en la lista, generamos una excepción.
-          if( !in_array( $values[$name], $curr[0] ) )
-            throw new Exception( 'Valor \'' . $values[$name] . '\' del campo \'' . $name . '\' inválido' );
-        }
+        if( !in_array( $values[$name], $curr[0] ) )
+          throw new Exception( 'Valor para el campo ['. $name . '] inválido' );
       }
->>>>>>> 64695922c473604f5d797d3ee8be6081ab036917
     }
 
-    return [ $values[$name], $curr[0] ];
+      return [ $values[$name], $curr[1] ];
   }
 
   function __construct( $format, $values, $list = 0, $ignoreDefaults = FALSE ) {

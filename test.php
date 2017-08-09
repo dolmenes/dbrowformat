@@ -2,7 +2,7 @@
 define( 'FORMAT1', [
   'uid' => SQLITE3_INTEGER,
   'name' => [ SQLITE3_TEXT, NULL, SQLITE3_NULL ],
-  'state' => [ SQLITE3_INTEGER, 1 ],
+  'state' => [ [ 0, 1, 2 ], SQLITE3_INTEGER, 1 ],
   'pin' => SQLITE3_INTEGER,
   'notes' => [ SQLITE3_TEXT, NULL, SQLITE3_NULL ]
 ] );
@@ -13,7 +13,8 @@ define( 'DATA1', [
 define( 'DATA2', [
   'uid' => 1,
   'name' => 'Juanjo',
-  'pin' => 0
+  'pin' => 0,
+  'state' => 5
 ] );
 
 require( './dbrowformat.php' );
